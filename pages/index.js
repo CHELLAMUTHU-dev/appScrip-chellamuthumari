@@ -5,15 +5,7 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import ProductCard from "../components/products"; // ✅ component to render product grid
 
-export async function getServerSideProps() {
-  try {
-    const res = await fetch("https://fakestoreapi.com/products");
-    const products = await res.json();
-    return { props: { products } };
-  } catch (error) {
-    return { props: { products: [] } };
-  }
-}
+
 
 const recommendations = [
   "RECOMMENDED",
@@ -23,24 +15,38 @@ const recommendations = [
   "PRICE: LOW TO HIGH",
 ];
 
-export default function Home({ products }) {
+export default function Home() {
+  const [products, setProducts] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
   const [recommended, setRecommended] = useState(false);
   const [filter, setFilter] = useState(recommendations[0]);
   const filterRef = useRef(null);
 
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (filterRef.current && !filterRef.current.contains(event.target)) {
-        setRecommended(false);
-      }
-    };
+  const fetchProducts = async () => {
+    try {
+      const response = await fetch("https://fakestoreapi.com/products");
+      const data = await response.json();
+      setProducts(data);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    }
+  };
 
-    document.addEventListener("click", handleClickOutside);
-    return () => {
-      document.removeEventListener("click", handleClickOutside);
-    };
-  }, []);
+  fetchProducts(); // ← CALL THE FUNCTION HERE
+
+  const handleClickOutside = (event) => {
+    if (filterRef.current && !filterRef.current.contains(event.target)) {
+      setRecommended(false);
+    }
+  };
+
+  document.addEventListener("click", handleClickOutside);
+
+  return () => {
+    document.removeEventListener("click", handleClickOutside);
+  };
+}, []);
 
   return (
     <>
